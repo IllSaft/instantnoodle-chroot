@@ -1,0 +1,3 @@
+```
+./tmp/chroot.sh  bash
+```
