@@ -1,0 +1,9 @@
+
+
+OnePlus8Pro:/ # ls -lah /dev/block/by-name/ | grep data
+lrwxrwxrwx 1 root root   16 1970-07-30 17:20 metadata -> /dev/block/sda20
+lrwxrwxrwx 1 root root   25 2023-12-14 17:59 reserve_a -> /data/reserve/reserve.img
+lrwxrwxrwx 1 root root   25 2023-12-14 17:59 reserve_b -> /data/reserve/reserve.img
+lrwxrwxrwx 1 root root   16 1970-07-30 17:21 secdata -> /dev/block/sde60
+lrwxrwxrwx 1 root root   16 1970-07-30 17:21 userdata -> *~~* /dev/block/sda24 *~~* -- This is what we are looking for
+lrwxrwxrwx 1 root root   16 1970-07-30 17:21 vm-data -> /dev/block/sde62
