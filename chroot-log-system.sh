@@ -64,7 +64,7 @@ log "Executing Chroot Environment Scripts..." "$BOLD_MAGENTA"
 # Mount the filesystem
 mkdir -p /mnt/system && log "✔️ Created /mnt/system directory." "$GREEN" || log "❌ Failed to create /mnt/system directory." "$RED"
 
-if mount -o loop /dev/block/dm-0 /mnt/system; then
+if mount -t /dev/block/dm-0 /mnt/system; then
     log "✔️ Mounted /dev/block/dm-0 to /mnt/system." "$GREEN"
 else
     log "❌ Failed to mount /dev/block/dm-0 to /mnt/system." "$RED"
@@ -107,7 +107,13 @@ chroot /mnt/system /bin/bash
 
 log "Exiting chroot environment..." "$YELLOW"
 
-dividerubuntuA}$storage_usage${RESET}"
+# The following will execute after you exit the chroot environment
+
+# Check disk usage and report if it's over a certain threshold
+storage_usage=$(df -h | grep '/mnt/system' | awk '{print $5}')
+
+# Log storage use percentage
+log "${YELLOW}Storage usage on /mnt/system: ${MAGENTA}$storage_usage${RESET}"
 
 # Warning for reaching 85% storage usage.
 df -h | grep '/mnt/system' | awk '{print $5}' | while read -r usage; do
