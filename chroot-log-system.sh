@@ -94,6 +94,7 @@ get_memory_info
 divider
 
 # Mount the filesystem
+mkdir -p /mnt/system && log "✔️ Created /mnt/system directory." "$GREEN" || log "❌ Failed to create /mnt/system directory." "$RED"
 log "Mounting the System Partition..." "$BOLD_MAGENTA"
 if mount -t ext4 /dev/block/dm-0 /mnt/system; then
     log "✔️ Mounted /dev/block/dm-0 to /mnt/system." "$GREEN"

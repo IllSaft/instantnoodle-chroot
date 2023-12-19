@@ -94,7 +94,8 @@ get_memory_info
 divider
 
 # Mount the filesystem
-log "Mounting the System Partition..." "$BOLD_MAGENTA"
+mkdir -p /mnt/ubuntu && log "✔️ Created /mnt/ubuntu directory." "$GREEN" || log "❌ Failed to create /mnt/ubuntu directory." "$RED"
+log "Mounting the Ubuntu Image..." "$BOLD_MAGENTA"
 if mount -o loop /data/ubuntu.img /mnt/ubuntu; then
     log "✔️ Mounted /data/ubuntu.img to /mnt/ubuntu." "$GREEN"
 
