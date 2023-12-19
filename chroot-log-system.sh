@@ -33,7 +33,6 @@ BG_WHITE='\033[47m'
 # Reset ANSI color code
 NC='\033[0m' # No Color
 
-
 # Define a log file
 LOG_FILE="/mnt/system/mount_script.log"
 
@@ -55,21 +54,68 @@ magenta_divider() {
 log() {
     local message="$1"
     local color="$2"
-    echo -e "${YELLOW}$(date '+%b/%d/%Y') — ${BOLD_BLUE}$(date '+%-l:%M %p'):${NC} ${color}${message}${NC}" | tee -a $LOG_FILE
+    echo -e "${YELLOW}$(date '+%b/%d/%Y') — ${BOLD_BLUE}$(date '+%-l:%M %p'):${NC} ${color}${message}${NC}" | tee -a "$LOG_FILE"
 }
+
+# Function to get and display the product model
+get_product_model() {
+    local model
+    model=$(getprop ro.product.model)
+    log "Device: $model" "$BOLD_GREEN"
+
+    local processor
+    processor=$(cat /proc/cpuinfo | grep 'Processor' | cut -d ':' -f 2 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    log "Processor: $processor" "$BOLD_GREEN"
+}
+
+# Function to get and display the number of processor cores using adb
+get_processor_cores() {
+    local num_cores
+    num_cores=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
+    log "Cores: ${num_cores} Cores" "$BOLD_GREEN"
+}
+
+# Function to get and display memory information in GB
+get_memory_info() {
+    local total_mem_kb
+    total_mem_kb=$(cat /proc/meminfo | grep 'MemTotal' | awk '{print $2}')
+    total_mem_gb=$(echo "scale=2; $total_mem_kb / 1024 / 1024" | bc)
+    log "Total Memory: ${total_mem_gb} GB" "$BOLD_GREEN"
+}
+
 
 # Start the script 
 log "Executing Chroot Environment Scripts..." "$BOLD_MAGENTA"
+divider
+log "Getting Device Info..." "$BOLD_MAGENTA"
+get_product_model
+get_processor_cores
+get_memory_info
+divider
 
 # Mount the filesystem
-mkdir -p /mnt/system && log "✔️ Created /mnt/system directory." "$GREEN" || log "❌ Failed to create /mnt/system directory." "$RED"
-
-if mount -t /dev/block/dm-0 /mnt/system; then
+log "Mounting the System Partition..." "$BOLD_MAGENTA"
+if mount -t ext4 /dev/block/dm-0 /mnt/system; then
     log "✔️ Mounted /dev/block/dm-0 to /mnt/system." "$GREEN"
+
+    # Update /etc/fstab
+    FSTAB_LINE="/dev/block/dm-0 /mnt/system ext4 rw 0 0"
+    if grep -Fxq "$FSTAB_LINE" /etc/fstab; then
+        log "✔️ Line already exists in /etc/fstab." "$GREEN"
+    else
+        echo "$FSTAB_LINE" | tee -a /etc/fstab > /dev/null
+        if grep -Fxq "$FSTAB_LINE" /etc/fstab; then
+            log "✔️ Line successfully added to /etc/fstab." "$GREEN"
+        else
+            log "❌ Failed to add line to /etc/fstab. Check permissions and path." "$RED"
+        fi
+    fi
+
 else
     log "❌ Failed to mount /dev/block/dm-0 to /mnt/system." "$RED"
     exit 1
 fi
+
 
 divider
 
